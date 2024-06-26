@@ -149,6 +149,7 @@ class CroissantBuilder(
       float_dtype: type_utils.TfdsDType | None = np.float32,
       mapping: Mapping[str, epath.PathLike] | None = None,
       overwrite_version: str | None = None,
+      skip_split_record_set: bool = True,
       **kwargs: Any,
   ):
     """Initializes a CroissantBuilder.
@@ -169,6 +170,8 @@ class CroissantBuilder(
         it to `~/Downloads/document.csv`, you can specify
         `mapping={"document.csv": "~/Downloads/document.csv"}`.
       overwrite_version: Semantic version of the dataset to be set.
+      skip_split_record_set: Whether to skip record sets with `cr:Split` data
+        type.
       **kwargs: kwargs to pass to GeneratorBasedBuilder directly.
     """
     if mapping is None:
@@ -186,9 +189,9 @@ class CroissantBuilder(
     self.RELEASE_NOTES = {}  # pylint: disable=invalid-name
 
     if not record_set_ids:
-      record_set_ids = [
-          record_set.id for record_set in self.metadata.record_sets
-      ]
+      record_set_ids = croissant_utils.get_record_set_ids(
+          self.metadata, skip_split_record_set=skip_split_record_set
+      )
     config_names = [
         huggingface_utils.convert_hf_name(record_set)
         for record_set in record_set_ids

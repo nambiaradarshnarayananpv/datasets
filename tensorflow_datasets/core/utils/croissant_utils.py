@@ -39,3 +39,25 @@ def get_tfds_dataset_name(dataset: mlc.Dataset) -> str:
   """Returns TFDS compatible dataset name of the given MLcroissant dataset."""
   dataset_name = get_dataset_name(dataset)
   return huggingface_utils.convert_hf_name(dataset_name)
+
+
+def get_record_set_ids(
+    metadata: mlc.Metadata, skip_split_record_set: bool = False
+) -> list[str]:
+  """Returns record set ids of the given MLcroissant metadata.
+
+  Args:
+    metadata: The metadata of the dataset.
+    skip_split_record_set: Whether to skip record sets which have data type
+      `cr:Split`. These are not considered to be configs in TFDS.
+  """
+  record_set_ids = []
+  for record_set in metadata.record_sets:
+    if (
+        skip_split_record_set
+        and 'http://mlcommons.org/croissant/Split' in record_set.data_types
+    ):
+      continue
+    record_set_ids.append(record_set.id)
+
+  return record_set_ids
